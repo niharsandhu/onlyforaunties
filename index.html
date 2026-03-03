@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Will You Go On A Date With Me?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- GSAP + plugins -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/TextPlugin.min.js"></script>
+  <!-- tsParticles for background -->
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles-confetti@2.12.0/tsparticles.confetti.bundle.min.js"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    @keyframes gradientShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #1a1a2e, #16213e, #0f3460);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      overflow: hidden;
+      position: relative;
+      padding: 1rem;
+    }
+
+    /* tsParticles container */
+    #tsparticles {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* floating emojis layer */
+    .float-emoji {
+      position: fixed;
+      font-size: 1.6rem;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      will-change: transform;
+    }
+
+    /* glow orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: .25;
+      z-index: 0;
+      will-change: transform;
+    }
+    .orb-1 { width: 300px; height: 300px; background: #c084fc; top: -80px; left: -60px; }
+    .orb-2 { width: 250px; height: 250px; background: #f472b6; bottom: -60px; right: -40px; }
+    .orb-3 { width: 200px; height: 200px; background: #fbbf24; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+
+    /* card */
+    .card {
+      position: relative;
+      z-index: 2;
+      background: rgba(255,255,255,.06);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 2rem;
+      padding: 2.8rem 2rem 2.2rem;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      opacity: 0;
+      overflow: visible;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 2rem;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(244,114,182,.4), rgba(192,132,252,.4), rgba(251,191,36,.2));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .emoji-hero {
+      font-size: 5rem;
+      display: inline-block;
+      filter: drop-shadow(0 0 20px rgba(244,114,182,.5));
+    }
+
+    h1 {
+      font-family: 'Dancing Script', cursive;
+      font-size: 2.2rem;
+      background: linear-gradient(135deg, #f9a8d4, #c084fc, #fbbf24, #f472b6);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 4s ease infinite;
+      margin: .6rem 0 .3rem;
+      line-height: 1.3;
+    }
+
+    .subtitle {
+      color: rgba(255,255,255,.6);
+      font-size: .95rem;
+      margin-bottom: 2rem;
+    }
+
+    .typed-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      background: rgba(255,255,255,.6);
+      margin-left: 2px;
+      animation: blink .7s infinite;
+      vertical-align: text-bottom;
+    }
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+    .btn-row {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      position: relative;
+      min-height: 80px;
+      align-items: center;
+    }
+
+    .btn {
+      padding: .9rem 2.4rem;
+      border: none;
+      border-radius: 999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+    }
+
+    .btn-yes {
+      background: linear-gradient(135deg, #f472b6, #c084fc, #818cf8);
+      background-size: 200% 200%;
+      animation: gradientShift 3s ease infinite;
+      color: #fff;
+      box-shadow: 0 4px 30px rgba(244,114,182,.4), 0 0 60px rgba(192,132,252,.2);
+    }
+    .btn-yes::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,.2) 50%, transparent 70%);
+      background-size: 200% 200%;
+      animation: sheen 2.5s ease-in-out infinite;
+    }
+    @keyframes sheen {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .btn-no {
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.7);
+      border: 1px solid rgba(255,255,255,.15);
+      transition: none;
+    }
+
+    /* success */
+    .success {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
+    }
+    .success.show { display: flex; }
+    .success .emoji-hero { font-size: 5.5rem; }
+    .success h1 { font-size: 2.4rem; }
+    .success p { color: rgba(255,255,255,.7); font-size: 1rem; }
+    .success .date-details {
+      margin-top: 1rem;
+      padding: 1rem 1.5rem;
+      background: rgba(255,255,255,.06);
+      border-radius: 1rem;
+      border: 1px solid rgba(255,255,255,.1);
+      color: rgba(255,255,255,.8);
+      font-size: .9rem;
+      line-height: 1.8;
+    }
+
+    .question-content.hide { display: none; }
+
+    /* ripple on tap */
+    .ripple {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 3;
+      border: 2px solid rgba(244,114,182,.5);
+    }
+  </style>
+</head>
+<body>
+
+<div id="tsparticles"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="card" id="card">
+  <div class="question-content" id="questionContent">
+    <div class="emoji-hero" id="heroEmoji">💐</div>
+    <h1 id="mainTitle">Will You Go On A Date With Me?</h1>
+    <p class="subtitle" id="subtitle"></p>
+    <div class="btn-row" id="btnRow">
+      <button class="btn btn-yes" id="btnYes">Yes! �</button>
+      <button class="btn btn-no" id="btnNo">No 😢</button>
+    </div>
+  </div>
+  <div class="success" id="successScreen">
+    <div class="emoji-hero">🥰</div>
+    <h1>Yaaay!</h1>
+    <p>I knew you'd say yes!</p>
+    <div class="date-details">
+      📅 This Saturday<br>
+      🕖 7:00 PM<br>
+      📍 That cute place you love<br>
+      👗 Dress cute!
+    </div>
+  </div>
+</div>
+
+<script>
+  gsap.registerPlugin(TextPlugin);
+
+  const card = document.getElementById('card');
+  const heroEmoji = document.getElementById('heroEmoji');
+  const mainTitle = document.getElementById('mainTitle');
+  const subtitle = document.getElementById('subtitle');
+  const btnYes = document.getElementById('btnYes');
+  const btnNo = document.getElementById('btnNo');
+  const btnRow = document.getElementById('btnRow');
+  const questionContent = document.getElementById('questionContent');
+  const successScreen = document.getElementById('successScreen');
+
+  // ========== PARTICLES BACKGROUND ==========
+  tsParticles.load("tsparticles", {
+    fullScreen: false,
+    particles: {
+      number: { value: 60, density: { enable: true, area: 800 } },
+      color: { value: ["#f472b6","#c084fc","#fbbf24","#818cf8","#34d399"] },
+      shape: { type: ["circle","star"] },
+      opacity: { value: { min: .15, max: .5 }, animation: { enable: true, speed: .8, minimumValue: .1 } },
+      size: { value: { min: 1, max: 4 }, animation: { enable: true, speed: 2, minimumValue: .5 } },
+      move: {
+        enable: true, speed: .8, direction: "none", random: true, straight: false,
+        outModes: "out", attract: { enable: true, rotateX: 600, rotateY: 1200 }
+      },
+      links: { enable: true, distance: 120, color: "#c084fc", opacity: .08, width: 1 },
+      twinkle: { particles: { enable: true, frequency: .03, color: { value: "#fbbf24" }, opacity: .8 } }
+    },
+    interactivity: {
+      events: {
+        onHover: { enable: true, mode: "grab" },
+        onClick: { enable: true, mode: "push" }
+      },
+      modes: {
+        grab: { distance: 140, links: { opacity: .25, color: "#f472b6" } },
+        push: { quantity: 3 }
+      }
+    },
+    detectRetina: true
+  });
+
+  // ========== FLOATING EMOJIS ==========
+  const emojis = ['💖','💗','💕','💘','💝','✨','🌸','💜','🦋','🌹','💫','⭐'];
+  for (let i = 0; i < 20; i++) {
+    const el = document.createElement('div');
+    el.className = 'float-emoji';
+    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.top = Math.random() * 100 + 'vh';
+    el.style.fontSize = (.8 + Math.random() * 1.5) + 'rem';
+    document.body.appendChild(el);
+
+    gsap.to(el, {
+      y: -window.innerHeight - 100,
+      x: `random(-80, 80)`,
+      rotation: `random(-360, 360)`,
+      opacity: 0.6,
+      duration: `random(8, 16)`,
+      delay: `random(0, 8)`,
+      repeat: -1,
+      ease: "none",
+      onStart: () => { gsap.set(el, { y: window.innerHeight + 60, opacity: 0 }); },
+      onRepeat: () => {
+        gsap.set(el, { y: window.innerHeight + 60, x: 0, left: Math.random()*100+'vw', opacity: 0 });
+      }
+    });
+  }
+
+  // ========== ORB ANIMATIONS ==========
+  gsap.to('.orb-1', { x: 60, y: 40, duration: 8, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+  gsap.to('.orb-2', { x: -50, y: -30, duration: 10, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+  gsap.to('.orb-3', { scale: 1.3, duration: 6, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+
+  // ========== ENTRANCE TIMELINE ==========
+  const tl = gsap.timeline({ defaults: { ease: 'back.out(1.7)' } });
+
+  tl.fromTo(card, { opacity: 0, y: 80, scale: .85, rotationX: 15 },
+    { opacity: 1, y: 0, scale: 1, rotationX: 0, duration: 1.2, ease: 'elastic.out(1, .6)' })
+    .fromTo(heroEmoji, { scale: 0, rotation: -180 },
+      { scale: 1, rotation: 0, duration: .8, ease: 'elastic.out(1, .4)' }, '-=.6')
+    .fromTo(mainTitle, { opacity: 0, y: 30, clipPath: 'inset(0 100% 0 0)' },
+      { opacity: 1, y: 0, clipPath: 'inset(0 0% 0 0)', duration: .8, ease: 'power3.out' }, '-=.3')
+    .to(subtitle, { duration: 1.8, text: { value: "I promise it'll be the best night ever ✨", delimiter: "" },
+      ease: 'none' }, '-=.2')
+    .fromTo(btnYes, { opacity: 0, scale: 0, rotation: -10 },
+      { opacity: 1, scale: 1, rotation: 0, duration: .6, ease: 'elastic.out(1, .5)' }, '-=.8')
+    .fromTo(btnNo, { opacity: 0, scale: 0, rotation: 10 },
+      { opacity: 1, scale: 1, rotation: 0, duration: .5, ease: 'back.out(2)' }, '-=.3');
+
+  // hero emoji continuous float
+  gsap.to(heroEmoji, { y: -12, rotation: 5, duration: 2, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+
+  // yes button breathing glow
+  gsap.to(btnYes, {
+    boxShadow: '0 4px 40px rgba(244,114,182,.6), 0 0 80px rgba(192,132,252,.3)',
+    scale: 1.04, duration: 1.2, repeat: -1, yoyo: true, ease: 'sine.inOut'
+  });
+
+  // ========== RIPPLE ON TAP ==========
+  document.addEventListener('click', (e) => {
+    const ripple = document.createElement('div');
+    ripple.className = 'ripple';
+    ripple.style.left = e.clientX + 'px';
+    ripple.style.top = e.clientY + 'px';
+    document.body.appendChild(ripple);
+    gsap.fromTo(ripple,
+      { width: 0, height: 0, x: 0, y: 0, opacity: 1 },
+      { width: 120, height: 120, x: -60, y: -60, opacity: 0, duration: .6, ease: 'power2.out',
+        onComplete: () => ripple.remove() });
+  });
+
+  // ========== RUNAWAY NO BUTTON ==========
+  let noCount = 0;
+  const noTexts = ['No 😢','Are you sure? 🥺','Please? 🥹','Pretty please? 💔','Think again! 😭','I\'ll be sad 😿','Last chance... 🫠'];
+
+  function dodgeNo() {
+    noCount++;
+    btnNo.textContent = noTexts[Math.min(noCount, noTexts.length - 1)];
+
+    // grow yes button
+    const yesScale = 1 + noCount * 0.1;
+    gsap.to(btnYes, { scale: Math.min(yesScale, 1.6), duration: .3, ease: 'elastic.out(1,.5)' });
+
+    // shake the card a little
+    gsap.to(card, { x: `random(-6, 6)`, duration: .1, repeat: 3, yoyo: true, ease: 'power2.inOut',
+      onComplete: () => gsap.to(card, { x: 0, duration: .2 }) });
+
+    // move no button to random position
+    const cardRect = card.getBoundingClientRect();
+    const btnRect = btnNo.getBoundingClientRect();
+    const maxX = cardRect.width - btnRect.width - 30;
+    const maxY = cardRect.height - btnRect.height - 30;
+
+    btnNo.style.position = 'absolute';
+    btnNo.style.zIndex = '2';
+
+    gsap.to(btnNo, {
+      left: 15 + Math.random() * maxX,
+      top: 15 + Math.random() * maxY,
+      rotation: `random(-20, 20)`,
+      scale: Math.max(1 - noCount * 0.06, 0.6),
+      duration: .25,
+      ease: 'power4.out'
+    });
+
+    // sad emoji burst
+    for (let i = 0; i < 4; i++) {
+      const sad = document.createElement('div');
+      sad.className = 'float-emoji';
+      sad.textContent = ['😢','💔','🥺','😭'][i];
+      sad.style.position = 'fixed';
+      sad.style.left = (btnRect.left + btnRect.width/2) + 'px';
+      sad.style.top = (btnRect.top) + 'px';
+      sad.style.fontSize = '1.4rem';
+      sad.style.zIndex = '10';
+      document.body.appendChild(sad);
+      gsap.fromTo(sad,
+        { opacity: 1, scale: 0 },
+        { opacity: 0, scale: 1.5, y: -80 - Math.random()*60, x: (Math.random()-.5)*120,
+          rotation: `random(-180,180)`, duration: 1, ease: 'power2.out',
+          onComplete: () => sad.remove() });
+    }
+  }
+
+  btnNo.addEventListener('mouseenter', dodgeNo);
+  btnNo.addEventListener('touchstart', (e) => { e.preventDefault(); dodgeNo(); }, { passive: false });
+
+  // ========== YES → SUCCESS ==========
+  btnYes.addEventListener('click', () => {
+    // epic confetti
+    const duration = 4000;
+    const end = Date.now() + duration;
+    const colors = ['#f472b6','#c084fc','#fbbf24','#34d399','#60a5fa','#818cf8','#fb7185'];
+
+    (function frame() {
+      confetti({ particleCount: 4, angle: 60, spread: 55, origin: { x: 0 }, colors });
+      confetti({ particleCount: 4, angle: 120, spread: 55, origin: { x: 1 }, colors });
+      confetti({ particleCount: 3, angle: 90, spread: 80, origin: { y: 0 }, colors, gravity: 1.5 });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    })();
+
+    // big center burst
+    confetti({ particleCount: 150, spread: 100, origin: { x: .5, y: .5 }, colors,
+      startVelocity: 45, gravity: .8, ticks: 300 });
+
+    // transition card
+    const tl2 = gsap.timeline();
+    tl2.to(questionContent, { opacity: 0, scale: .8, y: -20, duration: .4, ease: 'power2.in',
+        onComplete: () => {
+          questionContent.classList.add('hide');
+          successScreen.classList.add('show');
+        }
+      })
+      .fromTo(successScreen, { opacity: 0, scale: .5, y: 40 },
+        { opacity: 1, scale: 1, y: 0, duration: .8, ease: 'elastic.out(1, .5)' })
+      .fromTo(successScreen.querySelector('.emoji-hero'),
+        { scale: 0, rotation: -360 },
+        { scale: 1, rotation: 0, duration: 1, ease: 'elastic.out(1, .3)' }, '-=.6')
+      .fromTo(successScreen.querySelector('h1'),
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: .5 }, '-=.4')
+      .fromTo(successScreen.querySelector('p'),
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: .4 }, '-=.2')
+      .fromTo(successScreen.querySelector('.date-details'),
+        { opacity: 0, y: 20, scale: .9 },
+        { opacity: 1, y: 0, scale: 1, duration: .5, ease: 'back.out(1.7)' }, '-=.1');
+
+    // heart emoji rain
+    const heartInterval = setInterval(() => {
+      confetti({
+        particleCount: 1, spread: 30, origin: { x: Math.random(), y: -0.1 },
+        shapes: ['circle'], colors: ['#f472b6','#c084fc','#fbbf24'],
+        gravity: 0.6, scalar: 2, drift: (Math.random()-.5)*2
+      });
+    }, 80);
+    setTimeout(() => clearInterval(heartInterval), 5000);
+  });
+</script>
+</body>
+</html>
